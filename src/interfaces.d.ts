@@ -15,67 +15,100 @@ export interface ICharacter {
 
 export interface IMeta {
   age: string,
-  version: string,
   setting?: string,
+  version: string,
   campaign?: string,
   player?: string,
-  is_npc?: boolean,
+  is_npc?: boolean | null,
 }
 
 // # ANCHOR basic
 
 export interface IBasic extends IBasicStat {
-  occupation: IOccupation,
-  bonus: Array<IBonus>,
+  skills: ISkills | null,
+  version: string | null,
+  variant: string | null | false,
+  creaditTable: ICreaditTable | null,
+  talent: null,
+  occupations: IOccupations | null,
+  bonus: IBonus | null,
   age_modify: {
-    characteristic: string,
+    characteristic: string | null,
     luck_bonus: boolean,
   },
 }
 
+export interface ICreaditTable extends Array<ICreaditRow> { }
+
+export interface ICreaditRow {
+  range: [number, number],
+  currency: string,
+  spending_level: {
+    value?: [IMoney, IMoney] | IMoney,
+    description?: string,
+  },
+  cash: {
+    value?: [IMoney, IMoney] | IMoney,
+    description?: string,
+  },
+  assets: {
+    value?: [IMoney, IMoney] | IMoney,
+    description?: string,
+  },
+}
+
 export interface IBonus {
-  name: string,
-  skill_point?: number,
-  applied_skills?: string[],
-  cthulhu_mythos?: number | IDice,
-  san_modified?: number | IDice,
-  annotaion?: string,
+  [key: string]: {
+    skill_point?: number,
+    applied_skills?: string[],
+    cthulhu_mythos?: number | IDice,
+    san_modified?: number | IDice,
+    annotaion?: string,
+  }
+}
+
+export interface IOccupations {
+  [key: string]: IOccupation
 }
 
 export interface IOccupation {
   name: string,
-  occupation_skill_point: Array<
+  occupation_skill_point?: Array<
     Array<{
       characteristic: string,
       muitipler: number,
     }>
   >,
-  occupation_skills: string[],
+  occupation_skills?: string[],
 }
 
 export interface IBasicStat {
   characteristic: ICharacteristic,
-  skills: ISkills,
 }
 
 export interface ICharacteristic {
-  str: number,
-  dex: number,
-  con: number,
-  siz: number,
-  app: number,
-  pow: number,
-  int: number,
-  edu: number,
+  str: number | null,
+  dex: number | null,
+  con: number | null,
+  siz: number | null,
+  app: number | null,
+  pow: number | null,
+  int: number | null,
+  edu: number | null,
 }
 
-export interface ISkills extends Array<ISkill> { }
+export type SCharacteristics = 'str' | 'dex' | 'con' | 'siz' | 'app' | 'pow' | 'int' | 'edu'
+
+export interface ISkills {
+  [key: string]: ISkill | IBundleSkill,
+}
 
 export interface ISkill {
-  key: string,
   is_empty: boolean,
   display: string,
-  full_display: string,
+  special?: boolean,
+  collective?: boolean,
+  rare?: boolean,
   basic: {
     score: number | null,
     compute?: {
@@ -83,13 +116,56 @@ export interface ISkill {
       operation?(...n: number[] | number): number,
     },
   },
+}
+
+export interface IBundleSkill {
+  is_empty: boolean,
+  display: string,
+  special?: boolean,
   collective?: boolean,
-  belongs_to?: string,
+  rare?: boolean,
+  basic: {
+    score: number | null,
+    compute?: {
+      relative: IStatQuery | Array<IStatQuery>,
+      operation?(...n: number[] | number): number,
+    },
+  },
+  belongs_to: string,
 }
 
 // # ANCHOR assigned
 
-export interface IAssignedStat extends IBasicStat { }
+export interface IAssignedStat extends IBasicStat {
+  assigned_skills: IAssignedSkills | null,
+  skill_points: {
+    used: number | null,
+    occupation: number | null,
+    interesting: number | null,
+    bonus: {
+      [bonus_key: string]: {
+        value: number,
+      }
+    } | null,
+  },
+  occupation: string | null,
+  age: number | null,
+}
+
+export interface IAssignedSkills {
+  [skill_key: string]: IAssignedSkill | IAssignedBonusSkill,
+}
+
+export interface IAssignedSkill {
+  value: number,
+  asigned_value: number,
+}
+
+export interface IAssignedBonusSkill {
+  value: number,
+  asigned_value: number,
+  belongs_to: string,
+}
 
 // # ANCHOR development
 
