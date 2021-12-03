@@ -1,11 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import _ from 'lodash'
 import {
   IAssignedStat,
   SCharacteristics,
   ICharacteristic,
   IAssignedSkill,
-  IAssignedBonusSkill,
+  IAssignedSubSkill,
+  IDevelopedSkill,
+  IDevelopedSubSkill,
 } from '../interfaces'
 import { computeTotalSkills } from '../lib/helpers/compute'
 import { RootState } from '../store'
@@ -22,6 +23,7 @@ const initialState: IAssignedStat = {
     edu: null,
   },
   assigned_skills: null,
+  developed_skills: null,
   skill_points: {
     used: null,
     occupation: null,
@@ -64,7 +66,7 @@ const assignedSlice = createSlice({
       state,
       action: PayloadAction<{
         skill_key: string,
-        skill: IAssignedSkill | IAssignedBonusSkill | null,
+        skill: IAssignedSkill | IAssignedSubSkill | null,
       }>
     ) => {
       const { skill_key, skill } = action.payload
@@ -88,6 +90,33 @@ const assignedSlice = createSlice({
 
       const used = computeTotalSkills(state.assigned_skills)
       state.skill_points.used = used
+    },
+
+    updateDevelopment: (
+      state,
+      action: PayloadAction<{
+        skill_key: string,
+        skill: IDevelopedSkill | IDevelopedSubSkill | null,
+      }>,
+    ) => {
+      const { skill_key, skill } = action.payload
+
+      if (state.developed_skills !== null) {
+        if (
+          skill !== null &&
+          skill.value === 0
+        ) {
+          delete state.developed_skills[skill_key]
+        } else {
+          state.developed_skills = {
+            ...state.developed_skills,
+            [skill_key]: {
+              ...state.developed_skills[skill_key],
+              ...skill,
+            }
+          }
+        }
+      }
     },
 
     updateSkillPoints: (
@@ -150,6 +179,7 @@ export const {
   deleteBonusSkill,
   updatedOccupation,
   updatedAge,
+  updateDevelopment,
 } = assignedSlice.actions
 
 export const selectAssigned = (state: RootState) => state.assigned

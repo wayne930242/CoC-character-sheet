@@ -1,41 +1,41 @@
 export interface ICharacter {
+  appInfo: IAppInfo,
   meta: IMeta,
   basic: IBasic,
   derived: IDerivedStat,
   assigned: IAssignedStat,
-  development: IDevelopment,
   story: IBackStory,
   weapons: IWeapons,
   possession: IPossession,
-  fellow: Array<IInvestigator>,
-  note: INote,
+  fellows: IFellows,
+  note: string | INote,
+}
+
+// # ANCHOR IAppInfo
+
+export interface IAppInfo {
+  display: 'zhTW' | 'hung' | 'en'
 }
 
 // # ANCHOR meta
 
 export interface IMeta {
-  age: string,
   setting?: string,
   version: string,
   campaign?: string,
   player?: string,
-  is_npc?: boolean | null,
 }
 
 // # ANCHOR basic
 
-export interface IBasic extends IBasicStat {
+export interface IBasic {
   skills: ISkills | null,
   version: string | null,
-  variant: string | null | false,
   creaditTable: ICreaditTable | null,
-  talent: null,
+  talent?: null,
   occupations: IOccupations | null,
   bonus: IBonus | null,
-  age_modify: {
-    characteristic: string | null,
-    luck_bonus: boolean,
-  },
+  backStoryTitle: string[],
 }
 
 export interface ICreaditTable extends Array<ICreaditRow> { }
@@ -43,16 +43,19 @@ export interface ICreaditTable extends Array<ICreaditRow> { }
 export interface ICreaditRow {
   range: [number, number],
   currency: string,
+  symbol: string,
   spending_level: {
-    value?: [IMoney, IMoney] | IMoney,
+    value?: number,
     description?: string,
   },
   cash: {
-    value?: [IMoney, IMoney] | IMoney,
+    value?: number,
+    multipler?: number,
     description?: string,
   },
   assets: {
-    value?: [IMoney, IMoney] | IMoney,
+    value?: number,
+    multipler?: number,
     description?: string,
   },
 }
@@ -104,7 +107,6 @@ export interface ISkills {
 }
 
 export interface ISkill {
-  is_empty: boolean,
   display: string,
   special?: boolean,
   collective?: boolean,
@@ -119,7 +121,6 @@ export interface ISkill {
 }
 
 export interface IBundleSkill {
-  is_empty: boolean,
   display: string,
   special?: boolean,
   collective?: boolean,
@@ -138,6 +139,7 @@ export interface IBundleSkill {
 
 export interface IAssignedStat extends IBasicStat {
   assigned_skills: IAssignedSkills | null,
+  developed_skills: IDevelopedSkills | null,
   skill_points: {
     used: number | null,
     occupation: number | null,
@@ -153,7 +155,7 @@ export interface IAssignedStat extends IBasicStat {
 }
 
 export interface IAssignedSkills {
-  [skill_key: string]: IAssignedSkill | IAssignedBonusSkill,
+  [skill_key: string]: IAssignedSkill | IAssignedSubSkill,
 }
 
 export interface IAssignedSkill {
@@ -161,60 +163,63 @@ export interface IAssignedSkill {
   asigned_value: number,
 }
 
-export interface IAssignedBonusSkill {
+export interface IAssignedSubSkill {
   value: number,
   asigned_value: number,
   belongs_to: string,
 }
 
-// # ANCHOR development
+export interface IDevelopedSkills {
+  [skill_key: string]: IDevelopedSkill | IDevelopedSubSkill,
+}
 
-export interface IDevelopment extends IBasicStat {
-  age: number,
+export interface IDevelopedSkill {
+  value: number,
+}
+
+export interface IDevelopedSubSkill {
+  value: number,
+  belongs_to: string,
 }
 
 // # ANCHOR derived
 
 export interface IDerivedStat {
-  hp: number,
-  mp: number,
-  pulp_hp?: boolean,
-  san: number,
-  mov: number,
-  build: number,
-  db: IDice | number,
-  luck: string,
+  hp: number | null,
+  mp: number | null,
+  pulp_hp?: boolean | null,
+  san: number | null,
+  mov: number | null,
+  build: number | null,
+  db: IDice | number | null,
+  luck: string | null,
   current: {
-    hp: number,
-    mp: number,
-    san: number,
-    luck: number,
-    mov_plus?: boolean,
-    mov_minus?: boolean,
-    major_wound?: boolean,
-    temp_insane?: boolean,
-    indef_insane?: boolean,
+    hp: number | null,
+    mp: number | null,
+    san: number | null,
+    luck: number | null,
+    mov_plus?: boolean | null,
+    mov_minus?: boolean | null,
+    major_wound?: boolean | null,
+    temp_insane?: boolean | null,
+    indef_insane?: boolean | null,
   },
 }
 
 // # ANCHOR back story
 
 export interface IBackStory {
-  name: string,
-  sex: string,
-  residence: string,
-  birth_place: string,
-  photo_url: string,
-  persional_description?: Array<IStoryItem>,
-  ideology_or_beliefs?: Array<IStoryItem>,
-  significant_people?: Array<IStoryItem>,
-  meaningful_location?: Array<IStoryItem>,
-  treasured_possesions?: Array<IStoryItem>,
-  trails?: Array<IStoryItem>,
-  injuries_and_scars?: Array<IStoryItem>,
-  phobias_and_manias?: Array<IStoryItem>,
-  arcane_tomes_spells_and_artifacts?: Array<IStoryItem>,
-  encounters_with_strange_entities?: Array<IStoryItem>,
+  name: string | null,
+  sex: string | null,
+  residence: string | null,
+  birth_place: string | null,
+  photo_url: string | null,
+  bio: string | null,
+  backStory: IStoryItems | null,
+}
+
+export interface IStoryItems {
+  [storyTitle: string]: string,
 }
 
 export interface IStoryItem {
@@ -227,19 +232,20 @@ export interface IStoryItem {
   by_kp?: boolean,
 }
 
-// # weapon
+// # ANCHOR weapon
 
-export interface IWeapons extends IWeapon { }
+export interface IWeapons extends Array<IWeapon> { }
 
 export interface IWeapon {
   name: string,
   skill: string,
   damage: {
     dice: IDice | number,
-    db: boolean
+    db?: 'full' | 'half' | null,
   },
   range: string,
   attacks: number,
+  pierce?: boolean,
   ammo?: number,
   malfunction?: string,
   annotation?: string,
@@ -251,9 +257,10 @@ export interface IWeapon {
 export interface IPossession {
   gear_and_possesions: Array<IItem>,
   cash_and_assets: {
-    spending_level: IMoney,
-    cash: IMoney,
-    assets: IMoney,
+    spending_level: number | null,
+    cash: number | null,
+    assets: number | null,
+    assets_items: Array<IItem>,
   }
 }
 
@@ -261,22 +268,21 @@ export interface IItem {
   key: string,
   name: string,
   description?: string,
-  price?: IMoney,
+  price?: number,
 }
 
-export interface IMoney {
-  num: number,
-  symbol: string,
-  display: string,
-  currency?: string,
-}
+// # ANCHOR fellow
 
-export interface IInvestigator {
+export interface IFellows extends Array<IFellow> { }
+
+export interface IFellow {
   occupation: string,
   name: string,
   age?: string | number,
   player: string,
 }
+
+// # ANCHOR note
 
 export interface INote {
   key: string,
