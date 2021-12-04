@@ -41,11 +41,13 @@ export interface IBasic {
 export interface ICreaditTable extends Array<ICreaditRow> { }
 
 export interface ICreaditRow {
-  range: [number, number],
+  range: number[],
+  level: string,
   currency: string,
   symbol: string,
   spending_level: {
     value?: number,
+    multipler?: number,
     description?: string,
   },
   cash: {
@@ -103,36 +105,30 @@ export interface ICharacteristic {
 export type SCharacteristics = 'str' | 'dex' | 'con' | 'siz' | 'app' | 'pow' | 'int' | 'edu'
 
 export interface ISkills {
-  [key: string]: ISkill | IBundleSkill,
+  [key: string]: ISkill | ISubSkill | ICollectiveSkill,
 }
 
 export interface ISkill {
-  display: string,
   special?: boolean,
-  collective?: boolean,
   rare?: boolean,
-  basic: {
-    score: number | null,
-    compute?: {
-      relative: IStatQuery | Array<IStatQuery>,
-      operation?(...n: number[] | number): number,
-    },
-  },
+  mythos?: boolean,
+  score?: number | string,
 }
 
-export interface IBundleSkill {
-  display: string,
+export interface ISubSkill {
+  sub: true,
   special?: boolean,
-  collective?: boolean,
   rare?: boolean,
-  basic: {
-    score: number | null,
-    compute?: {
-      relative: IStatQuery | Array<IStatQuery>,
-      operation?(...n: number[] | number): number,
-    },
-  },
+  score?: number | string,
+  mythos?: boolean,
   belongs_to: string,
+}
+
+export interface ICollectiveSkill {
+  collective: true,
+  score?: boolean,
+  special?: boolean,
+  rare?: boolean,
 }
 
 // # ANCHOR assigned
